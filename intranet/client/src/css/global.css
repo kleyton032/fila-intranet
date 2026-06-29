@@ -1,0 +1,66 @@
+.button-ver {
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 10px 20px;
+  margin: 5px;
+  border: 1px solid darkred;
+  cursor: pointer;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.button-ver:focus {
+  outline: thin dotted;
+  outline: 0px auto -webkit-focus-ring-color;
+  outline-offset: 0px;
+}
+
+.button-success-ver {
+  background-color: transparent;
+  color: coral;
+  border: 0;
+}
+
+.container-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imgFundo {
+  width: 80%;
+  margin-bottom: 20px;
+
+}
+
+.verDivButton {
+  position: absolute;
+  left: 35%;
+  margin-top: 15%;
+}
+
+@media(max-width: 400px) {
+  .verDivButton {
+    position: absolute;
+    left: 20%;
+    margin-top: 25%;
+  }
+
+  .button-ver {
+    font-weight: 0.5rem;
+    text-decoration: none;
+    font-size: 0.5rem;
+    padding: 5px 15px;
+    margin: 5px;
+    border: 2px solid #aaaa;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+
+  .button-success-ver {
+    background-color: transparent;
+    color: coral;
+    border: 0;
+  }
+}
