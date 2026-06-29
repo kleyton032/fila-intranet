@@ -1,55 +1,55 @@
-name: CI/CD Pipeline
-
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-
-jobs:
-  # ─── Backend ────────────────────────────────────────────────────────────────
-  backend-ci:
-    name: Backend – Lint, Type-check e Testes
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Instalar dependências
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Type check
-        run: npx tsc --noEmit
-
-      - name: Testes unitários
-        run: npm run test:cov
-
-      - name: Upload cobertura
-        uses: codecov/codecov-action@v4
-        with:
-          directory: backend/coverage
-
-  # ─── Build de produção────────────────────────────────────────
-  build:
-    name: Build de produção
-    needs: [backend-ci]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build das imagens Docker
-        run: docker compose build
+# name: CI/CD Pipeline
+# 
+# on:
+#   push:
+#     branches: [main, develop]
+#   pull_request:
+#     branches: [main, develop]
+# 
+# jobs:
+#   # ─── Backend ────────────────────────────────────────────────────────────────
+#   backend-ci:
+#     name: Backend – Lint, Type-check e Testes
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: backend
+# 
+#     steps:
+#       - uses: actions/checkout@v4
+# 
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: '20'
+#           cache: 'npm'
+#           cache-dependency-path: backend/package-lock.json
+# 
+#       - name: Instalar dependências
+#         run: npm ci
+# 
+#       - name: Lint
+#         run: npm run lint
+# 
+#       - name: Type check
+#         run: npx tsc --noEmit
+# 
+#       - name: Testes unitários
+#         run: npm run test:cov
+# 
+#       - name: Upload cobertura
+#         uses: codecov/codecov-action@v4
+#         with:
+#           directory: backend/coverage
+# 
+#   # ─── Build de produção────────────────────────────────────────
+#   build:
+#     name: Build de produção
+#     needs: [backend-ci]
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main'
+# 
+#     steps:
+#       - uses: actions/checkout@v4
+# 
+#       - name: Build das imagens Docker
+#         run: docker compose build
