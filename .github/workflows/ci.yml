@@ -41,7 +41,7 @@ jobs:
         with:
           directory: backend/coverage
 
-  # ─── Build de produção (apenas main) ────────────────────────────────────────
+  # ─── Build de produção────────────────────────────────────────
   build:
     name: Build de produção
     needs: [backend-ci]
@@ -53,10 +53,3 @@ jobs:
 
       - name: Build das imagens Docker
         run: docker compose build
-
-      - name: (Opcional) Push para registry
-        # Descomente e configure quando tiver um registry Docker configurado
-        # run: |
-        #   echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-        #   docker compose push
-        run: echo "Etapa de push desabilitada — configure o registry"
