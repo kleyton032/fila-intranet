@@ -22,6 +22,17 @@ export const ORACLE_POOL = 'ORACLE_POOL';
         };
 
         try {
+          try {
+            // Tenta inicializar o cliente nativo (Thick mode) do Oracle Instant Client configurado no Dockerfile
+            oracledb.initOracleClient({ libDir: '/opt/oracle/instantclient_19_22' });
+            logger.log('Oracle Instant Client (Thick mode) inicializado com sucesso', 'DatabaseModule');
+          } catch (clientErr) {
+            // Ignora o erro se o cliente já estiver inicializado (DPI-1044)
+            if (!(clientErr as Error).message.includes('DPI-1044')) {
+              logger.warn('Não foi possível inicializar o Oracle Instant Client. Detalhes: ' + (clientErr as Error).message, 'DatabaseModule');
+            }
+          }
+
           await oracledb.createPool(config);
           logger.log('Pool Oracle criado com sucesso', 'DatabaseModule');
           return oracledb.getPool();
