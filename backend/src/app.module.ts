@@ -6,8 +6,7 @@ import databaseConfig from '@config/database.config';
 import jwtConfig from '@config/jwt.config';
 import { DatabaseModule } from '@shared/infrastructure/database/database.module';
 import { LoggerModule } from '@shared/infrastructure/logger/logger.module';
-import { AuthModule } from '@modules/auth/auth.module';
-import { UsuarioModule } from '@modules/usuario/usuario.module';
+import { FilaConsultasExamesModule } from '@modules/fila-consultas-exames/fila-consultas-exames.module';
 
 @Module({
   imports: [
@@ -31,8 +30,7 @@ import { UsuarioModule } from '@modules/usuario/usuario.module';
     DatabaseModule,
 
     // Módulos de domínio
-    AuthModule,
-    UsuarioModule,
+    FilaConsultasExamesModule,
   ],
 })
 export class AppModule {}
