@@ -1,9 +1,55 @@
-import { Global, Module, OnModuleDestroy } from '@nestjs/common';
+import { Global, Module, OnModuleDestroy, Injectable, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as oracledb from 'oracledb';
+import { Pool, Connection, BindParameters, ExecuteOptions } from 'oracledb';
 import { AppLoggerService } from '@shared/infrastructure/logger/app-logger.service';
 
 export const ORACLE_POOL = 'ORACLE_POOL';
+
+@Injectable()
+export class DatabaseService {
+  constructor(@Inject(ORACLE_POOL) private readonly pool: Pool) {}
+
+  async execute<T = Record<string, unknown>>(
+    sql: string,
+    binds: BindParameters = {},
+    options: ExecuteOptions = {},
+  ): Promise<T[]> {
+    let connection: Connection | undefined;
+    try {
+      connection = await this.pool.getConnection();
+      const result = await connection.execute(sql, binds, {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        ...options,
+      });
+      return (result.rows as T[]) || [];
+    } finally {
+      if (connection) {
+        await connection.close();
+      }
+    }
+  }
+
+  async executeMany(
+    sql: string,
+    binds: BindParameters[],
+    options: ExecuteOptions = {},
+  ): Promise<number> {
+    let connection: Connection | undefined;
+    try {
+      connection = await this.pool.getConnection();
+      const result = await connection.executeMany(sql, binds, {
+        autoCommit: true,
+        ...options,
+      });
+      return result.rowsAffected || 0;
+    } finally {
+      if (connection) {
+        await connection.close();
+      }
+    }
+  }
+}
 
 @Global()
 @Module({
@@ -52,54 +98,6 @@ export class DatabaseModule implements OnModuleDestroy {
       await oracledb.getPool().close(10);
     } catch {
       // Pool já fechado
-    }
-  }
-}
-
-import { Injectable, Inject } from '@nestjs/common';
-import { Pool, Connection, BindParameters, ExecuteOptions } from 'oracledb';
-
-@Injectable()
-export class DatabaseService {
-  constructor(@Inject(ORACLE_POOL) private readonly pool: Pool) {}
-
-  async execute<T = Record<string, unknown>>(
-    sql: string,
-    binds: BindParameters = {},
-    options: ExecuteOptions = {},
-  ): Promise<T[]> {
-    let connection: Connection | undefined;
-    try {
-      connection = await this.pool.getConnection();
-      const result = await connection.execute(sql, binds, {
-        outFormat: oracledb.OUT_FORMAT_OBJECT,
-        ...options,
-      });
-      return (result.rows as T[]) || [];
-    } finally {
-      if (connection) {
-        await connection.close();
-      }
-    }
-  }
-
-  async executeMany(
-    sql: string,
-    binds: BindParameters[],
-    options: ExecuteOptions = {},
-  ): Promise<number> {
-    let connection: Connection | undefined;
-    try {
-      connection = await this.pool.getConnection();
-      const result = await connection.executeMany(sql, binds, {
-        autoCommit: true,
-        ...options,
-      });
-      return result.rowsAffected || 0;
-    } finally {
-      if (connection) {
-        await connection.close();
-      }
     }
   }
 }
