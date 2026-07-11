@@ -1,9 +1,12 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 import { GetFilaConsultasExamesUseCase } from '../../application/use-cases/get-fila-consultas-exames.use-case';
 import { GetFilaConsultasExamesQueryDto } from '../../application/dtos/get-fila-consultas-exames.dto';
 
 @ApiTags('Fila Consultas e Exames')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 @Controller('fila-consultas-exames')
 export class FilaConsultasExamesController {
   constructor(private readonly getFilaConsultasExamesUseCase: GetFilaConsultasExamesUseCase) {}

@@ -6,6 +6,7 @@ import databaseConfig from '@config/database.config';
 import jwtConfig from '@config/jwt.config';
 import { DatabaseModule } from '@shared/infrastructure/database/database.module';
 import { LoggerModule } from '@shared/infrastructure/logger/logger.module';
+import { AuthModule } from '@modules/auth/auth.module';
 import { FilaConsultasExamesModule } from '@modules/fila-consultas-exames/fila-consultas-exames.module';
 
 @Module({
@@ -30,6 +31,7 @@ import { FilaConsultasExamesModule } from '@modules/fila-consultas-exames/fila-c
     DatabaseModule,
 
     // Módulos de domínio
+    AuthModule,
     FilaConsultasExamesModule,
   ],
 })
