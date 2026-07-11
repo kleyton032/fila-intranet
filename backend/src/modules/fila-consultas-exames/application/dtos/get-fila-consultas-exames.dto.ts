@@ -1,5 +1,6 @@
-import { IsNotEmpty, Matches } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, Matches, IsOptional, IsArray, IsNumber } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 const dataRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[012])\/\d{4}$/;
 
@@ -19,4 +20,18 @@ export class GetFilaConsultasExamesQueryDto {
   @IsNotEmpty({ message: 'A data final é obrigatória.' })
   @Matches(dataRegex, { message: 'A data final deve estar no formato DD/MM/YYYY.' })
   dataFim: string;
+
+  @ApiPropertyOptional({
+    description: 'IDs de item de agendamento',
+    example: '1,2,3',
+  })
+  @IsOptional()
+  @IsArray({ message: 'O item de agendamento deve ser um array ou string separada por vírgula' })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') return value.split(',').map(v => Number(v.trim()));
+    if (Array.isArray(value)) return value.map(v => Number(v));
+    return value;
+  })
+  @IsNumber({}, { each: true, message: 'Cada item de agendamento deve ser um número' })
+  itemAgendamento?: number[];
 }

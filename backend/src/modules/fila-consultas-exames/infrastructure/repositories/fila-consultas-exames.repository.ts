@@ -18,8 +18,8 @@ interface FilaRow {
 export class FilaConsultasExamesRepository implements IFilaConsultasExamesRepository {
   constructor(private readonly db: DatabaseService) {}
 
-  async findFilaByPeriodo(dataInicio: string, dataFim: string): Promise<FilaConsultasExamesEntity[]> {
-    const sql = `
+  async findFilaByPeriodo(dataInicio: string, dataFim: string, itemAgendamento?: number[]): Promise<FilaConsultasExamesEntity[]> {
+    let sql = `
       SELECT
           ROW_NUMBER() OVER (ORDER BY F.CD_PRIORI, TRUNC(F.DT_LANCA_LISTA)) AS POSICAO,
           F.CD_PACIENTE AS ID_PACIENTE,
@@ -38,7 +38,17 @@ export class FilaConsultasExamesRepository implements IFilaConsultasExamesReposi
       AND TRUNC(F.DT_LANCA_LISTA) <= TO_DATE(:dataFim,'DD/MM/YYYY')
     `;
 
-    const rows = await this.db.execute<FilaRow>(sql, { dataInicio, dataFim });
+    const binds: any = { dataInicio, dataFim };
+
+    if (itemAgendamento && itemAgendamento.length > 0) {
+      const itemAgendamentoKeys = itemAgendamento.map((_, index) => `:itemAgendamento${index}`);
+      itemAgendamento.forEach((element, index) => {
+        binds[`itemAgendamento${index}`] = element;
+      });
+      sql += `\n      AND F.CD_IT_AGEND IN (${itemAgendamentoKeys.join(', ')})`;
+    }
+
+    const rows = await this.db.execute<FilaRow>(sql, binds);
 
     return rows.map((row) => new FilaConsultasExamesEntity({
       posicao: row.POSICAO,

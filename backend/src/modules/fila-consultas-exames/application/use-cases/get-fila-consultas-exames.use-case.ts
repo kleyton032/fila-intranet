@@ -11,7 +11,7 @@ export class GetFilaConsultasExamesUseCase {
   ) {}
 
   async execute(query: GetFilaConsultasExamesQueryDto): Promise<FilaConsultasExamesEntity[]> {
-    const { dataInicio, dataFim } = query;
-    return this.filaConsultasExamesRepository.findFilaByPeriodo(dataInicio, dataFim);
+    const { dataInicio, dataFim, itemAgendamento } = query;
+    return this.filaConsultasExamesRepository.findFilaByPeriodo(dataInicio, dataFim, itemAgendamento);
   }
 }
