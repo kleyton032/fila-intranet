@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '@shared/infrastructure/database/database.module';
 import { IFilaConsultasExamesRepository } from '../../domain/repositories/fila-consultas-exames.repository.interface';
 import { FilaConsultasExamesEntity } from '../../domain/entities/fila-consultas-exames.entity';
+import { PacienteDetalhesEntity } from '../../domain/entities/paciente-detalhes.entity';
 
 interface FilaRow {
   POSICAO: number;
@@ -59,6 +60,48 @@ export class FilaConsultasExamesRepository implements IFilaConsultasExamesReposi
       idadePaciente: row.IDADE_PACIENTE,
       cnsPaciente: row.CNS_PACIENTE,
       cidadePaciente: row.CIDADE_PACIENTE,
+    }));
+  }
+
+  async findHistoricoPaciente(idPaciente: number): Promise<PacienteDetalhesEntity[]> {
+    const sql = `
+      SELECT
+          POSICAO AS "posicao",
+          CD_ITEM_AGENDAMENTO || ' - ' || INITCAP(DS_ITEM_AGENDAMENTO) AS "itemAgendamento",
+          TO_CHAR(DT_LANCA_LISTA, 'DD/MM/YYYY') AS "dataEntrada",
+          CD_ATENDIMENTO AS "idAtendimento",
+          CD_PRIORI || ' - ' || DS_PRIORI AS "prioridade",
+          TP_SITUACAO AS "situacao",
+          TO_CHAR(DT_AGENDAMENTO, 'DD/MM/YYYY') AS "dataAgendamento",
+          TO_CHAR(DT_REALIZACAO, 'DD/MM/YYYY') AS "dataRealizacao",
+          TO_CHAR(DT_RETORNO, 'DD/MM/YYYY') AS "dataRetorno"
+      FROM VDIC_FAV_FILA_POSICAO
+      WHERE TP_SITUACAO <> 'C'
+      AND CD_PACIENTE = :idPaciente
+      ORDER BY
+        CASE
+          WHEN TP_SITUACAO = 'S' THEN 1
+          WHEN TP_SITUACAO IN ('A','G') THEN 2
+          WHEN TP_SITUACAO = 'T' THEN 3
+          ELSE 4
+        END,
+        POSICAO
+    `;
+
+    const binds = { idPaciente };
+
+    const rows = await this.db.execute<any>(sql, binds);
+
+    return rows.map((row) => new PacienteDetalhesEntity({
+      posicao: row.posicao,
+      itemAgendamento: row.itemAgendamento,
+      dataEntrada: row.dataEntrada,
+      idAtendimento: row.idAtendimento,
+      prioridade: row.prioridade,
+      situacao: row.situacao,
+      dataAgendamento: row.dataAgendamento,
+      dataRealizacao: row.dataRealizacao,
+      dataRetorno: row.dataRetorno,
     }));
   }
 }
